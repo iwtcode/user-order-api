@@ -12,7 +12,7 @@ REST API для управления пользователями и их зак
 
 #### 1.1. Установите и запустите Docker
 
-> Требуется установленный [Docker](https://www.docker.com/) и [Docker Compose](https://docs.docker.com/compose/)
+> Требуется установленный [Docker](https://www.docker.com/), [Docker Compose](https://docs.docker.com/compose/)
 
 #### 1.2. Создайте файл **.env** и настройте переменные окружения (Опционально)
 
@@ -30,18 +30,16 @@ JWT_SECRET=your-secret-key
 #### 1.3. Запустите построение образа Docker
 
 ```sh
-docker compose up --build
+docker compose up -d --build
 ```
 
-### Дополнительно
-
-#### Повторные запуски
+#### 1.4. Запуск программы
 
 ```
 docker compose up
 ```
 
-#### Смена переменных окружения (очистка базы данных и создание новой)
+#### Дополнительно. Смена переменных окружения (очистка базы данных и создание новой)
 
 ```
 docker compose down
@@ -52,7 +50,7 @@ docker compose up --build
 ### 2. Локальный запуск без Docker
 
 #### 2.1. Установите Golang
-> Требуется установленный [Golang (1.24.2)](https://go.dev/dl/)
+> Требуется установленный [Golang (1.24.2)](https://go.dev/dl/) и [PostgreSQL](https://www.postgresql.org/download/)
 
 #### 2.2. Создайте файл **.env** и настройте переменные окружения
 
