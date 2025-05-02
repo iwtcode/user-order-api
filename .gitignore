@@ -3,7 +3,6 @@
 *.dll
 *.so
 *.dylib
-
-.env
-
 *.txt
+.env
+server

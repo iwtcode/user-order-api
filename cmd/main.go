@@ -30,22 +30,14 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// 3. Auto-migrate schema (Good for development, consider manual migrations for production)
-	log.Println("Running database migrations...")
-	/* err = db.AutoMigrate(&models.User{}, &models.Order{}) // Add Order model later
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	} */
-	log.Println("Database migration completed.")
-
-	// 4. Initialize Dependencies (Repository -> Service -> Handler)
+	// 3. Initialize Dependencies (Repository -> Service -> Handler)
 	userRepo := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(userRepo)
 	// Initialize other repos, services, handlers here later...
 
-	// 5. Initialize Gin Router
+	// 4. Initialize Gin Router
 	router := gin.Default()
 
 	// Auth route (no JWT required)
@@ -61,7 +53,7 @@ func main() {
 		// Add other user routes (GET, PUT, DELETE) here later...
 	}
 
-	// 7. Start Server
+	// 5. Start Server
 	log.Printf("Server starting on port %s", cfg.ServerPort)
 	if err := router.Run(cfg.ServerPort); err != nil {
 		log.Fatalf("Failed to start server: %v", err)

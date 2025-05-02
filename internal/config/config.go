@@ -25,7 +25,7 @@ func LoadConfig() (*Config, error) {
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "postgres")
-	dbPassword := getEnv("DB_PASSWORD", "password") // Change this default
+	dbPassword := getEnv("DB_PASSWORD", "your-postgres-password")
 	dbName := getEnv("DB_NAME", "userorderapi")
 	dbSSLMode := getEnv("DB_SSLMODE", "disable")
 
