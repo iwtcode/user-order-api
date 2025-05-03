@@ -44,7 +44,7 @@ docker compose up
 ```
 docker compose down
 docker volume rm user-order-api_db-data
-docker compose up --build
+docker compose up -d --build
 ```
 
 ### 2. Локальный запуск без Docker
@@ -79,4 +79,52 @@ JWT_SECRET=your-secret-key
 или
 ```
 go run cmd/main.go
+```
+
+---
+
+### Структура проекта
+
+```
+user-order-api/
+├── cmd/                         # Точка входа в приложение
+│   └── main.go                  # Главный файл запуска сервера
+├── internal/                    # Внутренние пакеты приложения
+│   ├── config/                  # Конфигурация приложения
+│   │   └── config.go            # Загрузка переменных окружения
+│   ├── handlers/                # HTTP-обработчики (контроллеры)
+│   │   ├── user_handler.go      # Обработчики для пользователей
+│   │   ├── order_handler.go     # Обработчики для заказов
+│   │   └── auth_handler.go      # Обработчик для авторизации
+│   ├── models/                  # Описания моделей данных (структуры для БД)
+│   │   ├── user.go              # Модель пользователя
+│   │   └── order.go             # Модель заказа
+│   ├── repository/              # Слой доступа к данным (репозитории)
+│   │   ├── user_repo.go         # Методы работы с пользователями в БД
+│   │   └── order_repo.go        # Методы работы с заказами в БД
+│   ├── services/                # Бизнес-логика (сервисы)
+│   │   ├── user_service.go      # Логика управления пользователями
+│   │   ├── order_service.go     # Логика управления заказами
+│   │   └── auth_service.go      # Логика авторизации и работы с токенами
+│   ├── middleware/              # Промежуточные обработчики (обёртки)
+│   │   └── auth_middleware.go   # JWT-аутентификация для защищённых маршрутов
+│   └── utils/                   # Вспомогательные функции и утилиты
+│       ├── jwt.go               # Генерация и валидация JWT-токенов
+│       └── password.go          # Хеширование и проверка паролей
+├── migrations/                  # SQL-миграции
+│   ├── 000001_create_users_table.up.sql
+│   ├── 000001_create_users_table.down.sql
+│   ├── 000002_create_orders_table.up.sql
+│   └── 000002_create_orders_table.down.sql
+├── docs/                        # Документация API
+├── go.mod                       # Файл зависимостей Go-модулей
+├── go.sum                       # Контрольные суммы зависимостей
+├── .env                         # Пример файла переменных окружения
+├── .gitignore                   # Файлы и папки, игнорируемые Git
+├── .dockerignore                # Файлы и папки, игнорируемые Docker
+├── Dockerfile                   # Dockerfile для сборки контейнера приложения
+├── docker-compose.yml           # Docker Compose для запуска приложения и БД
+├── setup.sh                     # Установщик миграций и приложения
+├── README.md                    # Основная документация и инструкции по запуску
+└── LICENSE                      # Лицензия проекта
 ```
