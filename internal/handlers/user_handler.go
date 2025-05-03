@@ -9,7 +9,7 @@ import (
 	"github.com/iwtcode/user-order-api/internal/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10" // For detailed validation errors
+	"github.com/go-playground/validator/v10"
 )
 
 // UserHandler holds the user service

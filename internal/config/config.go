@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv" // Use go get github.com/joho/godotenv
+	"github.com/joho/godotenv"
 )
 
 // Config holds application configuration

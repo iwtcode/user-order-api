@@ -52,7 +52,7 @@ docker compose up --build
 #### 2.1. Установите Golang и PostgreSQL
 > Требуется установленный [Golang (1.24.2)](https://go.dev/dl/) и [PostgreSQL](https://www.postgresql.org/download/)
 
-#### 2.2. Создайте файл **.env** и настройте переменные окружения
+#### 2.2. Создайте файл **.env** и настройте переменные окружения (Обязательно)
 
 ```ini
 SERVER_PORT=8080

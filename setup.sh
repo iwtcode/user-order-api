@@ -71,7 +71,7 @@ fi
 
 echo "Building Go application..."
 if go build -o server.exe cmd/main.go; then
-  echo "Build successful. Binary: ./server"
+  echo "Build successful. Binary: ./server.exe"
 else
   echo "Build failed."
   exit 1
