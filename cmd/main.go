@@ -33,8 +33,10 @@ func main() {
 	// 3. Initialize Dependencies (Repository -> Service -> Handler)
 	userRepo := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
+	authService := services.NewAuthService(userRepo)
+
 	userHandler := handlers.NewUserHandler(userService)
-	authHandler := handlers.NewAuthHandler(userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
 	// Initialize other repos, services, handlers here later...
 
 	// 4. Initialize Gin Router

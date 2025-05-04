@@ -36,7 +36,7 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		DBConnectionString: dsn,
-		ServerPort:         ":" + serverPort, // Prepend colon for ListenAndServe
+		ServerPort:         ":" + serverPort,
 	}, nil
 }
 

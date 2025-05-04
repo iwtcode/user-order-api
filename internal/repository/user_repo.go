@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"github.com/iwtcode/user-order-api/internal/models"
@@ -10,9 +11,9 @@ import (
 
 // UserRepository defines the interface for user data operations
 type UserRepository interface {
-	CreateUser(user *models.User) error
-	GetUserByEmail(email string) (*models.User, error)
-	ListUsers(page, limit, minAge, maxAge int) ([]models.User, int64, error)
+	CreateUser(ctx context.Context, user *models.User) error
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	ListUsers(ctx context.Context, page, limit, minAge, maxAge int) ([]models.User, int64, error)
 }
 
 // userRepository implements UserRepository
@@ -26,28 +27,27 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 // CreateUser inserts a new user record into the database
-func (r *userRepository) CreateUser(user *models.User) error {
-	result := r.db.Create(user) // GORM automatically populates the ID field of the user struct
+func (r *userRepository) CreateUser(ctx context.Context, user *models.User) error {
+	result := r.db.WithContext(ctx).Create(user)
 	return result.Error
 }
 
-// GetUserByEmail retrieves a user by their email address
-func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
+func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
-	result := r.db.Where("email = ?", email).First(&user)
+	result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil // Return nil, nil if user not found (not an application error)
+			return nil, nil
 		}
-		return nil, result.Error // Return other DB errors
+		return nil, result.Error
 	}
 	return &user, nil
 }
 
-func (r *userRepository) ListUsers(page, limit, minAge, maxAge int) ([]models.User, int64, error) {
+func (r *userRepository) ListUsers(ctx context.Context, page, limit, minAge, maxAge int) ([]models.User, int64, error) {
 	var users []models.User
 	var total int64
-	query := r.db.Model(&models.User{})
+	query := r.db.WithContext(ctx).Model(&models.User{})
 	if minAge > 0 {
 		query = query.Where("age >= ?", minAge)
 	}
