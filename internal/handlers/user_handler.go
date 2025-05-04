@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -42,23 +43,20 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 
 	// Call the service to create the user
-	newUser, err := h.userService.CreateUser(&req)
+	newUser, err := h.userService.CreateUser(c.Request.Context(), &req)
 	if err != nil {
-		// Check for specific business logic errors
 		if errors.Is(err, services.ErrEmailExists) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}) // 400 Bad Request
+			log.Printf("Attempt to create user with existing email: %s", req.Email)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		// Handle other potential errors (DB connection, hashing, etc.)
-		// Log the error server-side
-		// log.Printf("Error creating user: %v", err) // Assuming you have a logger
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"}) // 500 Internal Server Error
+		log.Printf("Error creating user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
-
-	// User created successfully, return 201 Created with user details (excluding password)
+	log.Printf("User created: id=%d, email=%s", newUser.ID, newUser.Email)
 	response := models.BuildUserResponse(newUser)
-	c.JSON(http.StatusCreated, response) // 201 Created
+	c.JSON(http.StatusCreated, response)
 }
 
 // ListUsers handles GET /users with pagination and filtering
@@ -68,11 +66,13 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 	minAge, _ := strconv.Atoi(c.DefaultQuery("min_age", "0"))
 	maxAge, _ := strconv.Atoi(c.DefaultQuery("max_age", "0"))
 
-	users, total, err := h.userService.ListUsers(page, limit, minAge, maxAge)
+	users, total, err := h.userService.ListUsers(c.Request.Context(), page, limit, minAge, maxAge)
 	if err != nil {
+		log.Printf("Error fetching users: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
 	}
+	log.Printf("Fetched users: page=%d, limit=%d, total=%d", page, limit, total)
 	respUsers := make([]models.UserResponse, len(users))
 	for i, u := range users {
 		respUsers[i] = models.BuildUserResponse(&u)
