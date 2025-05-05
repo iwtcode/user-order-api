@@ -97,10 +97,13 @@ func (r *userRepository) ListUsers(ctx context.Context, page, limit, minAge, max
 
 // Обновляет данные пользователя
 func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
-	result := r.db.WithContext(ctx).Save(user)
+	result := r.db.WithContext(ctx).Model(&models.User{}).Where("id = ?", user.ID).Updates(user)
 	if result.Error != nil {
 		utils.Error("Failed to update user in DB: %v", result.Error)
 		return errors.New("failed to update user: " + result.Error.Error())
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
