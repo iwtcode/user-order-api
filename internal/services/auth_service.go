@@ -26,12 +26,18 @@ func NewAuthService(userRepo repository.UserRepository) AuthService {
 
 func (s *authService) Login(ctx context.Context, email, password string) (string, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil || user == nil || !utils.CheckPasswordHash(password, user.PasswordHash) {
+	if err != nil {
+		utils.Error("Database error during login for email %s: %v", email, err)
+		return "", errors.New("database error: " + err.Error())
+	}
+	if user == nil || !utils.CheckPasswordHash(password, user.PasswordHash) {
+		utils.Warn("Invalid credentials for email: %s", email)
 		return "", ErrInvalidCredentials
 	}
 	token, err := utils.GenerateJWT(user.ID)
 	if err != nil {
-		return "", err
+		utils.Error("Failed to generate JWT for user id=%d: %v", user.ID, err)
+		return "", errors.New("failed to generate JWT: " + err.Error())
 	}
 	return token, nil
 }

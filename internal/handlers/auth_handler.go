@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,8 +23,7 @@ func NewAuthHandler(authService services.AuthService) *AuthHandler {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("Invalid login request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Validation failed", "details": err.Error()})
 		return
 	}
 
@@ -34,14 +32,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		status := http.StatusInternalServerError
 		if err == services.ErrInvalidCredentials {
 			status = http.StatusUnauthorized
-			log.Printf("Failed login attempt for email: %s", req.Email)
-		} else {
-			log.Printf("Error during login for email %s: %v", req.Email, err)
+			c.JSON(status, gin.H{"error": "Invalid email or password"})
+			return
 		}
-		c.JSON(status, gin.H{"error": err.Error()})
+		// Не раскрываем детали внутренней ошибки клиенту
+		c.JSON(status, gin.H{"error": "Login failed"})
 		return
 	}
 
-	log.Printf("User logged in: %s", req.Email)
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }

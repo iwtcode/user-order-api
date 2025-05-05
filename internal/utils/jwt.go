@@ -39,3 +39,8 @@ func ParseJWT(tokenString string) (jwt.MapClaims, error) {
 	}
 	return claims, nil
 }
+
+// Вспомогательная функция для получения ошибки истечения срока действия токена
+func JwtErrTokenExpired() error {
+	return jwt.ErrTokenExpired
+}
