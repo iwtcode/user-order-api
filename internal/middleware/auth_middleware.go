@@ -9,14 +9,17 @@ import (
 	"github.com/iwtcode/user-order-api/internal/utils"
 )
 
+// Промежуточный middleware для проверки JWT-токена в запросах
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Получаем заголовок Authorization
 		authHeader := c.GetHeader("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			utils.Warn("Missing or invalid Authorization header: %s", authHeader)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or invalid Authorization header"})
 			return
 		}
+		// Проверяем наличие и валидность токена
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		claims, err := utils.ParseJWT(tokenString)
 		if err != nil {
@@ -29,6 +32,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token: " + err.Error()})
 			return
 		}
+		// Извлекаем user_id из токена и сохраняем в контекст запроса
 		userID, ok := claims["user_id"].(float64)
 		if !ok {
 			utils.Error("Invalid token payload: user_id missing. Claims: %+v", claims)

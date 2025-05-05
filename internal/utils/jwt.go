@@ -8,8 +8,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Функция для генерации и проверки JWT-токенов
+// jwtSecret — секретный ключ для подписи токенов
 var jwtSecret = []byte(getJWTSecret())
 
+// Получает секретный ключ из .env или переменных окружения
 func getJWTSecret() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -21,6 +24,7 @@ func getJWTSecret() string {
 	return "your-secret-key"
 }
 
+// Генерирует JWT-токен для пользователя по его ID
 func GenerateJWT(userID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
@@ -30,6 +34,7 @@ func GenerateJWT(userID uint) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
+// Разбирает и валидирует JWT-токен, возвращает claims
 func ParseJWT(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
@@ -44,7 +49,7 @@ func ParseJWT(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-// Вспомогательная функция для получения ошибки истечения срока действия токена
+// Возвращает ошибку истечения срока действия токена
 func JwtErrTokenExpired() error {
 	return jwt.ErrTokenExpired
 }

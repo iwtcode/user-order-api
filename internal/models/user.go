@@ -2,16 +2,18 @@ package models
 
 import "gorm.io/gorm"
 
-// User represents the user model corresponding to the 'users' table
+// Структура пользователя для хранения в базе данных
 type User struct {
-	gorm.Model          // Includes fields like ID, CreatedAt, UpdatedAt, DeletedAt
+	gorm.Model
 	Name         string `gorm:"type:varchar(255);not null" json:"name"`
 	Email        string `gorm:"type:varchar(255);unique;not null" json:"email"`
 	Age          int    `gorm:"not null" json:"age"`
-	PasswordHash string `gorm:"type:varchar(255);not null" json:"-"` // Exclude password hash from JSON responses
+	PasswordHash string `gorm:"type:varchar(255);not null" json:"-"`
 }
 
-// UserResponse is the format for sending user data back in API responses (excluding sensitive info)
+// UserResponse содержит данные пользователя
+// swagger:model
+// Структура для ответа API с данными пользователя
 type UserResponse struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -19,15 +21,26 @@ type UserResponse struct {
 	Age   int    `json:"age"`
 }
 
-// CreateUserRequest defines the expected structure for user creation JSON payload
+// CreateUserRequest содержит данные для создания пользователя
+// swagger:model
+// Структура для запроса на создание пользователя
 type CreateUserRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
-	Age      int    `json:"age" binding:"required,gte=1"`      // Example validation: age >= 1
-	Password string `json:"password" binding:"required,min=8"` // Example validation: password min 8 chars
+	Age      int    `json:"age" binding:"required,gte=1"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
-// BuildUserResponse creates a UserResponse from a User model
+// UpdateUserRequest содержит данные для обновления пользователя
+// swagger:model
+// Структура для запроса на обновление пользователя
+type UpdateUserRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
+	Age   int    `json:"age" binding:"required,gte=1"`
+}
+
+// Вспомогательная функция для формирования ответа API по пользователю
 func BuildUserResponse(user *User) UserResponse {
 	return UserResponse{
 		ID:    user.ID,

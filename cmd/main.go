@@ -9,41 +9,50 @@ import (
 	"github.com/iwtcode/user-order-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/iwtcode/user-order-api/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler) *gin.Engine {
+// Настраивает маршруты HTTP API
+func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, orderHandler *handlers.OrderHandler) *gin.Engine {
 	router := gin.New()
 	router.SetTrustedProxies(nil)
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	// Auth route (no JWT required)
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	router.POST("/auth/login", authHandler.Login)
 	router.POST("/users", userHandler.CreateUser)
 
-	// User routes (JWT required for all except creation)
 	userRoutes := router.Group("/users")
 	userRoutes.Use(middleware.JWTAuthMiddleware())
 	{
 		userRoutes.GET("", userHandler.ListUsers)
-		// Add other user routes (GET, PUT, DELETE) here later...
+		userRoutes.GET(":id", userHandler.GetUserByID)
+		userRoutes.PUT(":id", userHandler.UpdateUser)
+		userRoutes.DELETE(":id", userHandler.DeleteUser)
+		userRoutes.POST(":id/orders", orderHandler.CreateOrder)
+		userRoutes.GET(":id/orders", orderHandler.GetOrdersByUserID)
 	}
 
 	return router
 }
 
+// Главная функция запускает сервер приложения
 func main() {
-	// 1. Load Configuration
+	// Загружаем конфигурацию
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		utils.Error("Failed to load configuration: %v", err)
 		return
 	}
 
-	// 2. Initialize Database Connection (GORM)
+	// Подключаемся к базе данных
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info), // Log SQL queries
 	})
@@ -52,19 +61,21 @@ func main() {
 		return
 	}
 
-	// 3. Initialize Dependencies (Repository -> Service -> Handler)
+	// Инициализируем репозитории, сервисы и хэндлеры
 	userRepo := repository.NewUserRepository(db)
+	orderRepo := repository.NewOrderRepository(db)
 	userService := services.NewUserService(userRepo)
+	orderService := services.NewOrderService(orderRepo, userRepo)
 	authService := services.NewAuthService(userRepo)
 
 	userHandler := handlers.NewUserHandler(userService)
+	orderHandler := handlers.NewOrderHandler(orderService)
 	authHandler := handlers.NewAuthHandler(authService)
-	// Initialize other repos, services, handlers here later...
 
-	// 4. Initialize Gin Router
-	router := setupRoutes(userHandler, authHandler)
+	// Настраиваем маршруты
+	router := setupRoutes(userHandler, authHandler, orderHandler)
 
-	// 5. Start Server
+	// Запускаем сервер
 	if err := router.Run(cfg.ServerPort); err != nil {
 		utils.Error("Failed to start server: %v", err)
 	}

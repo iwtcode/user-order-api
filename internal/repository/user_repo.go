@@ -10,24 +10,28 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepository defines the interface for user data operations
+// Интерфейс репозитория пользователей для работы с БД
+// Описывает методы для CRUD-операций и поиска пользователей
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *models.User) error
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	GetUserByID(ctx context.Context, id uint) (*models.User, error)
 	ListUsers(ctx context.Context, page, limit, minAge, maxAge int) ([]models.User, int64, error)
+	UpdateUser(ctx context.Context, user *models.User) error
+	DeleteUser(ctx context.Context, id uint) error
 }
 
-// userRepository implements UserRepository
+// Реализация репозитория пользователей на GORM
 type userRepository struct {
 	db *gorm.DB
 }
 
-// NewUserRepository creates a new instance of UserRepository
+// Конструктор репозитория пользователей
 func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-// CreateUser inserts a new user record into the database
+// Создаёт нового пользователя в базе данных
 func (r *userRepository) CreateUser(ctx context.Context, user *models.User) error {
 	result := r.db.WithContext(ctx).Create(user)
 	if result.Error != nil {
@@ -37,6 +41,7 @@ func (r *userRepository) CreateUser(ctx context.Context, user *models.User) erro
 	return nil
 }
 
+// Получает пользователя по email
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
 	result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
@@ -50,7 +55,24 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 	return &user, nil
 }
 
+// Получает пользователя по ID
+func (r *userRepository) GetUserByID(ctx context.Context, id uint) (*models.User, error) {
+	var user models.User
+	result := r.db.WithContext(ctx).First(&user, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		utils.Error("Failed to get user by id: %v", result.Error)
+		return nil, errors.New("failed to get user by id: " + result.Error.Error())
+	}
+	return &user, nil
+}
+
+// Возвращает список пользователей с пагинацией и фильтрацией по возрасту
 func (r *userRepository) ListUsers(ctx context.Context, page, limit, minAge, maxAge int) ([]models.User, int64, error) {
+	// minAge/maxAge — фильтрация по возрасту
+	// page/limit — постраничный вывод
 	var users []models.User
 	var total int64
 	query := r.db.WithContext(ctx).Model(&models.User{})
@@ -71,4 +93,27 @@ func (r *userRepository) ListUsers(ctx context.Context, page, limit, minAge, max
 		return nil, 0, errors.New("failed to list users: " + result.Error.Error())
 	}
 	return users, total, nil
+}
+
+// Обновляет данные пользователя
+func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	result := r.db.WithContext(ctx).Save(user)
+	if result.Error != nil {
+		utils.Error("Failed to update user in DB: %v", result.Error)
+		return errors.New("failed to update user: " + result.Error.Error())
+	}
+	return nil
+}
+
+// Удаляет пользователя по ID
+func (r *userRepository) DeleteUser(ctx context.Context, id uint) error {
+	result := r.db.WithContext(ctx).Delete(&models.User{}, id)
+	if result.Error != nil {
+		utils.Error("Failed to delete user in DB: %v", result.Error)
+		return errors.New("failed to delete user: " + result.Error.Error())
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
