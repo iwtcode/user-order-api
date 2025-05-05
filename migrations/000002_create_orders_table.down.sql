@@ -1,2 +1,2 @@
--- Drop the orders table
+-- Удалить таблицу заказов
 DROP TABLE IF EXISTS orders;
