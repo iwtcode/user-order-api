@@ -5,16 +5,20 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 )
 
 var jwtSecret = []byte(getJWTSecret())
 
 func getJWTSecret() string {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		return "your-secret-key"
+	err := godotenv.Load()
+	if err != nil {
+		Warn("No .env file found or error loading it, relying on environment variables. %v", err)
 	}
-	return secret
+	if value, exists := os.LookupEnv("JWT_SECRET"); exists {
+		return value
+	}
+	return "your-secret-key"
 }
 
 func GenerateJWT(userID uint) (string, error) {

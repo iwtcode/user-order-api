@@ -2,9 +2,9 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/iwtcode/user-order-api/internal/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +19,7 @@ func LoadConfig() (*Config, error) {
 	// Load .env file if it exists (useful for local development)
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("No .env file found or error loading it, relying on environment variables.")
+		utils.Warn("No .env file found or error loading it, relying on environment variables. %v", err)
 	}
 
 	dbHost := getEnv("DB_HOST", "localhost")
