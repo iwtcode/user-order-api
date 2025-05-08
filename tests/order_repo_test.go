@@ -61,8 +61,8 @@ func TestOrderRepository_ListOrdersByUserID(t *testing.T) {
 	repo := repository.NewOrderRepository(db)
 	userID := uint(1)
 	rows := sqlmock.NewRows([]string{"id", "user_id", "product", "quantity", "price", "created_at"}).
-		AddRow(1, userID, "Book", 2, 10.5, time.Now()) // исправлено: передаем time.Time, а не строку
-	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 AND "orders"\."deleted_at" IS NULL ORDER BY created_at desc`).WithArgs(userID).WillReturnRows(rows)
+		AddRow(1, userID, "Book", 2, 10.5, time.Now())
+	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 ORDER BY created_at desc`).WithArgs(userID).WillReturnRows(rows)
 	orders, err := repo.ListOrdersByUserID(context.Background(), userID)
 	assert.NoError(t, err)
 	assert.Len(t, orders, 1)
@@ -76,7 +76,7 @@ func TestOrderRepository_ListOrdersByUserID_Empty(t *testing.T) {
 	defer cleanup()
 	repo := repository.NewOrderRepository(db)
 	userID := uint(2)
-	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 AND "orders"\."deleted_at" IS NULL ORDER BY created_at desc`).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "product", "quantity", "price", "created_at"}))
+	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 ORDER BY created_at desc`).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "product", "quantity", "price", "created_at"}))
 	orders, err := repo.ListOrdersByUserID(context.Background(), userID)
 	assert.NoError(t, err)
 	assert.Len(t, orders, 0)
@@ -88,7 +88,7 @@ func TestOrderRepository_ListOrdersByUserID_Error(t *testing.T) {
 	defer cleanup()
 	repo := repository.NewOrderRepository(db)
 	userID := uint(3)
-	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 AND "orders"\."deleted_at" IS NULL ORDER BY created_at desc`).WithArgs(userID).WillReturnError(errors.New("db error"))
+	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 ORDER BY created_at desc`).WithArgs(userID).WillReturnError(errors.New("db error"))
 	orders, err := repo.ListOrdersByUserID(context.Background(), userID)
 	assert.Error(t, err)
 	assert.Nil(t, orders)

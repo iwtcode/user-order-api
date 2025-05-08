@@ -16,7 +16,6 @@ import (
 	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 )
 
 type mockOrderService struct {
@@ -50,7 +49,7 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 			userID:      "1",
 			requestBody: gin.H{"product": "Book", "quantity": 2, "price": 10.5},
 			mockSetup: func(m *mockOrderService) {
-				m.On("CreateOrder", mock.Anything, uint(1), &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}).Return(&models.Order{Model: gorm.Model{ID: 1}, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}, nil)
+				m.On("CreateOrder", mock.Anything, uint(1), &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}).Return(&models.Order{ID: 1, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}, nil)
 			},
 			expectedCode: http.StatusCreated,
 			expectedBody: map[string]interface{}{"user_id": float64(1), "product": "Book", "quantity": float64(2), "price": 10.5},
@@ -135,7 +134,7 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 			name:   "success",
 			userID: "1",
 			mockSetup: func(m *mockOrderService) {
-				orders := []models.Order{{Model: gorm.Model{ID: 1}, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}}
+				orders := []models.Order{{ID: 1, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}}
 				m.On("ListOrdersByUserID", mock.Anything, uint(1)).Return(orders, nil)
 			},
 			expectedCode: http.StatusOK,

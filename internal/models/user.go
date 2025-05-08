@@ -1,10 +1,8 @@
 package models
 
-import "gorm.io/gorm"
-
 // Структура пользователя для хранения в базе данных
 type User struct {
-	gorm.Model
+	ID           uint   `gorm:"primaryKey" json:"id"`
 	Name         string `gorm:"type:varchar(255);not null" json:"name"`
 	Email        string `gorm:"type:varchar(255);unique;not null" json:"email"`
 	Age          int    `gorm:"not null" json:"age"`

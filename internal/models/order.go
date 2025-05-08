@@ -2,13 +2,11 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // Структура заказа для хранения в базе данных
 type Order struct {
-	gorm.Model
+	ID        uint      `gorm:"primaryKey" json:"id"`
 	UserID    uint      `gorm:"not null;index" json:"user_id"`
 	Product   string    `gorm:"type:varchar(255);not null" json:"product"`
 	Quantity  int       `gorm:"not null" json:"quantity"`
