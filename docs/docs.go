@@ -373,7 +373,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список заказов пользователя по его ID",
+                "description": "Возвращает список заказов пользователя по его ID. Пользователь может просматривать только свои заказы.",
                 "consumes": [
                     "application/json"
                 ],
@@ -412,6 +412,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -429,7 +438,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Создаёт новый заказ для пользователя по его ID",
+                "description": "Создаёт новый заказ для пользователя по его ID. Пользователь может создавать заказы только для своего user_id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -467,6 +476,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

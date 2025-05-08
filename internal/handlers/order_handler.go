@@ -31,7 +31,7 @@ func NewOrderHandler(orderService services.OrderService) *OrderHandler {
 // @Param input body models.OrderCreateRequest true "Данные заказа"
 // @Success 201 {object} models.OrderResponse
 // @Failure 400 {object} map[string]string
-// @Failure 403 {object} map[string]string "Access denied: you can only operate with your own orders"
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 422 {object} map[string]interface{}
 // @Router /users/{id}/orders [post]
@@ -99,7 +99,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 // @Param id path int true "ID пользователя"
 // @Success 200 {array} models.OrderResponse
 // @Failure 400 {object} map[string]string
-// @Failure 403 {object} map[string]string "Access denied: you can only view your own orders"
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /users/{id}/orders [get]
 // @Security BearerAuth

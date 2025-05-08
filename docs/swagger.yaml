@@ -316,7 +316,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает список заказов пользователя по его ID
+      description: Возвращает список заказов пользователя по его ID. Пользователь
+        может просматривать только свои заказы.
       parameters:
       - description: ID пользователя
         in: path
@@ -338,6 +339,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -352,7 +359,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создаёт новый заказ для пользователя по его ID
+      description: Создаёт новый заказ для пользователя по его ID. Пользователь может
+        создавать заказы только для своего user_id.
       parameters:
       - description: ID пользователя
         in: path
@@ -374,6 +382,12 @@ paths:
             $ref: '#/definitions/models.OrderResponse'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
           schema:
             additionalProperties:
               type: string
