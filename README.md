@@ -8,14 +8,14 @@ REST API для управления пользователями и их зак
 
 ## Основные эндпоинты
 
-`POST /auth/login` — авторизация, получение JWT<br>
-`POST /users` — создание пользователя<br>
-`GET /users` — список пользователей (пагинация, фильтрация)<br>
-`GET /users/{id}` — получить пользователя по ID<br>
-`PUT /users/{id}` — обновить пользователя<br>
-`DELETE /users/{id}` — удалить пользователя<br>
-`POST /users/{user_id}/orders` — создать заказ для пользователя<br>
-`GET /users/{user_id}/orders` — получить заказы пользователя
+`POST /auth/login` — Авторизация<br>
+`POST /users` — Создание пользователя<br>
+`GET /users` — Получение списка пользователей<br>
+`GET /users/{id}` — Получение пользователя по ID<br>
+`PUT /users/{id}` — Обновление пользователя<br>
+`DELETE /users/{id}` — Удаление пользователя<br>
+`POST /users/{user_id}/orders` — Создание заказа для пользователя<br>
+`GET /users/{user_id}/orders` — Получение списка заказов пользователя
 
 Полная документация — [Swagger UI](http://localhost:8080/swagger/index.html)
 
