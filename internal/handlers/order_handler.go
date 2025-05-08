@@ -38,7 +38,7 @@ func NewOrderHandler(orderService services.OrderService) *OrderHandler {
 // @Security BearerAuth
 func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	// Получаем user_id из JWT (middleware)
-	userIDValue, exists := c.Get("user_id")
+	userIDValue, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
 		return
@@ -105,7 +105,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 // @Security BearerAuth
 func (h *OrderHandler) GetOrdersByUserID(c *gin.Context) {
 	// Получаем user_id из JWT (middleware)
-	userIDValue, exists := c.Get("user_id")
+	userIDValue, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
 		return
