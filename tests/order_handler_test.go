@@ -34,11 +34,19 @@ func (m *mockOrderService) ListOrdersByUserID(ctx context.Context, userID uint) 
 	return orders, args.Error(1)
 }
 
+func addUserIDToContext(userID uint) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("user_id", userID)
+		c.Next()
+	}
+}
+
 func TestOrderHandler_CreateOrder(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name         string
-		userID       string
+		userIDPath   string
+		jwtUserID    uint
 		requestBody  gin.H
 		mockSetup    func(m *mockOrderService)
 		expectedCode int
@@ -46,7 +54,8 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 	}{
 		{
 			name:        "success",
-			userID:      "1",
+			userIDPath:  "1",
+			jwtUserID:   1,
 			requestBody: gin.H{"product": "Book", "quantity": 2, "price": 10.5},
 			mockSetup: func(m *mockOrderService) {
 				m.On("CreateOrder", mock.Anything, uint(1), &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}).Return(&models.Order{ID: 1, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}, nil)
@@ -55,16 +64,27 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 			expectedBody: map[string]interface{}{"user_id": float64(1), "product": "Book", "quantity": float64(2), "price": 10.5},
 		},
 		{
+			name:         "forbidden access",
+			userIDPath:   "2",
+			jwtUserID:    1,
+			requestBody:  gin.H{"product": "Book", "quantity": 2, "price": 10.5},
+			mockSetup:    func(m *mockOrderService) {},
+			expectedCode: http.StatusForbidden,
+			expectedBody: map[string]interface{}{"error": "Access denied: you can only operate with your own orders"},
+		},
+		{
 			name:         "invalid user id",
-			userID:       "abc",
+			userIDPath:   "abc",
+			jwtUserID:    1,
 			requestBody:  gin.H{"product": "Book", "quantity": 2, "price": 10.5},
 			mockSetup:    func(m *mockOrderService) {},
 			expectedCode: http.StatusBadRequest,
-			expectedBody: map[string]interface{}{"error": "Invalid user_id"},
+			expectedBody: map[string]interface{}{"error": "Invalid user ID in path"},
 		},
 		{
 			name:         "validation error",
-			userID:       "1",
+			userIDPath:   "1",
+			jwtUserID:    1,
 			requestBody:  gin.H{"product": "", "quantity": 0, "price": 0},
 			mockSetup:    func(m *mockOrderService) {},
 			expectedCode: http.StatusUnprocessableEntity,
@@ -72,7 +92,8 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 		},
 		{
 			name:        "user not found",
-			userID:      "2",
+			userIDPath:  "2",
+			jwtUserID:   2,
 			requestBody: gin.H{"product": "Book", "quantity": 2, "price": 10.5},
 			mockSetup: func(m *mockOrderService) {
 				m.On("CreateOrder", mock.Anything, uint(2), &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}).Return(nil, services.ErrOrderUserNotFound)
@@ -82,7 +103,8 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 		},
 		{
 			name:        "internal error",
-			userID:      "1",
+			userIDPath:  "1",
+			jwtUserID:   1,
 			requestBody: gin.H{"product": "Book", "quantity": 2, "price": 10.5},
 			mockSetup: func(m *mockOrderService) {
 				m.On("CreateOrder", mock.Anything, uint(1), &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}).Return(nil, errors.New("db error"))
@@ -101,10 +123,11 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 			h := handlers.NewOrderHandler(mockSvc)
 
 			r := gin.Default()
+			r.Use(addUserIDToContext(tt.jwtUserID))
 			r.POST("/users/:id/orders", h.CreateOrder)
 
 			body, _ := json.Marshal(tt.requestBody)
-			req, _ := http.NewRequest(http.MethodPost, "/users/"+tt.userID+"/orders", bytes.NewBuffer(body))
+			req, _ := http.NewRequest(http.MethodPost, "/users/"+tt.userIDPath+"/orders", bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 
@@ -124,15 +147,17 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tests := []struct {
 		name         string
-		userID       string
+		userIDPath   string
+		jwtUserID    uint
 		mockSetup    func(m *mockOrderService)
 		expectedCode int
 		expectedLen  int
 		expectedBody interface{}
 	}{
 		{
-			name:   "success",
-			userID: "1",
+			name:       "success",
+			userIDPath: "1",
+			jwtUserID:  1,
 			mockSetup: func(m *mockOrderService) {
 				orders := []models.Order{{ID: 1, UserID: 1, Product: "Book", Quantity: 2, Price: 10.5, CreatedAt: time.Now()}}
 				m.On("ListOrdersByUserID", mock.Anything, uint(1)).Return(orders, nil)
@@ -141,15 +166,25 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 			expectedLen:  1,
 		},
 		{
-			name:         "invalid user id",
-			userID:       "abc",
+			name:         "forbidden access",
+			userIDPath:   "2",
+			jwtUserID:    1,
 			mockSetup:    func(m *mockOrderService) {},
-			expectedCode: http.StatusBadRequest,
-			expectedBody: map[string]interface{}{"error": "Invalid user_id"},
+			expectedCode: http.StatusForbidden,
+			expectedBody: map[string]interface{}{"error": "Access denied: you can only view your own orders"},
 		},
 		{
-			name:   "user not found",
-			userID: "2",
+			name:         "invalid user id",
+			userIDPath:   "abc",
+			jwtUserID:    1,
+			mockSetup:    func(m *mockOrderService) {},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{"error": "Invalid user ID in path"},
+		},
+		{
+			name:       "user not found",
+			userIDPath: "2",
+			jwtUserID:  2,
 			mockSetup: func(m *mockOrderService) {
 				m.On("ListOrdersByUserID", mock.Anything, uint(2)).Return(nil, services.ErrOrderUserNotFound)
 			},
@@ -157,8 +192,9 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 			expectedBody: map[string]interface{}{"error": "User not found"},
 		},
 		{
-			name:   "internal error",
-			userID: "1",
+			name:       "internal error",
+			userIDPath: "1",
+			jwtUserID:  1,
 			mockSetup: func(m *mockOrderService) {
 				m.On("ListOrdersByUserID", mock.Anything, uint(1)).Return(nil, errors.New("db error"))
 			},
@@ -176,9 +212,10 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 			h := handlers.NewOrderHandler(mockSvc)
 
 			r := gin.Default()
+			r.Use(addUserIDToContext(tt.jwtUserID))
 			r.GET("/users/:id/orders", h.GetOrdersByUserID)
 
-			req, _ := http.NewRequest(http.MethodGet, "/users/"+tt.userID+"/orders", nil)
+			req, _ := http.NewRequest(http.MethodGet, "/users/"+tt.userIDPath+"/orders", nil)
 			w := httptest.NewRecorder()
 
 			r.ServeHTTP(w, req)
