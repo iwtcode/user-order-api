@@ -8,6 +8,9 @@ REST API для управления пользователями и их зак
 
 ## Быстрый старт
 
+> **Документация API доступна после запуска приложения по адресу:**
+> [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+
 ### 1. Запуск через Docker Compose (рекомендуется)
 
 #### 1.1. Установите и запустите Docker
@@ -46,6 +49,8 @@ docker compose down
 docker volume rm user-order-api_db-data
 docker compose up -d --build
 ```
+
+---
 
 ### 2. Локальный запуск без Docker
 
