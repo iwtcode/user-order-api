@@ -618,6 +618,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "BearerAuth": {
+            "description": "Введите JWT токен вместе с префиксом Bearer",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

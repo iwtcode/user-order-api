@@ -396,6 +396,7 @@ paths:
       - orders
 securityDefinitions:
   BearerAuth:
+    description: Введите JWT токен вместе с префиксом Bearer
     in: header
     name: Authorization
     type: apiKey

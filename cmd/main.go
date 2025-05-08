@@ -20,8 +20,11 @@ import (
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
+// @description Введите JWT токен вместе с префиксом Bearer
+// @scheme bearer
+// @bearerFormat JWT
 
-// Настраивает маршруты HTTP API
+// Настраиваем маршруты HTTP API
 func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, orderHandler *handlers.OrderHandler) *gin.Engine {
 	router := gin.New()
 	router.SetTrustedProxies(nil)
@@ -58,7 +61,7 @@ func main() {
 
 	// Подключаемся к базе данных
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info), // Log SQL queries
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		utils.Error("Failed to connect to database: %v", err)
