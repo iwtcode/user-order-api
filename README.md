@@ -28,6 +28,8 @@ DB_PASSWORD=your-postgres-password
 DB_NAME=userorderapi
 DB_SSLMODE=disable
 JWT_SECRET=your-secret-key
+JWT_EXPIRATION=24h
+GIN_MODE=debug
 ```
 
 #### 1.3. Запустите построение образа Docker
@@ -68,6 +70,8 @@ DB_PASSWORD=your-postgres-password
 DB_NAME=userorderapi
 DB_SSLMODE=disable
 JWT_SECRET=your-secret-key
+JWT_EXPIRATION=24h
+GIN_MODE=debug
 ```
 
 #### 2.3. Запустите установщик (через bash/git bash)

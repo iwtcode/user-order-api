@@ -60,7 +60,7 @@ func main() {
 	}
 
 	// Устанавливаем режим Gin
-	if cfg.GinMode == "RELEASE" {
+	if cfg.GinMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		gin.SetMode(gin.DebugMode)

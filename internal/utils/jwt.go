@@ -24,11 +24,28 @@ func getJWTSecret() string {
 	return "your-secret-key"
 }
 
+// Получает время жизни токена из .env или переменных окружения
+func getJWTExpiration() time.Duration {
+	err := godotenv.Load()
+	if err != nil {
+		Warn("No .env file found or error loading it, relying on environment variables. %v", err)
+	}
+	if value, exists := os.LookupEnv("JWT_EXPIRATION"); exists {
+		dur, err := time.ParseDuration(value)
+		if err == nil {
+			return dur
+		}
+		Warn("Invalid JWT_EXPIRATION format: %s, using default 24h", value)
+	}
+	return 24 * time.Hour
+}
+
 // Генерирует JWT-токен для пользователя по его ID
 func GenerateJWT(userID uint) (string, error) {
+	expiration := getJWTExpiration()
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     time.Now().Add(expiration).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
