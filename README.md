@@ -30,16 +30,16 @@ REST API для управления пользователями и их зак
 #### 1.2. Создайте файл **.env** и настройте переменные окружения (Опционально)
 
 ```ini
-SERVER_PORT=8080           # Порт, на котором запускается сервер
-DB_HOST=localhost          # Адрес сервера базы данных PostgreSQL
-DB_PORT=5432               # Порт базы данных PostgreSQL
-DB_USER=postgres           # Имя пользователя для подключения к БД
-DB_PASSWORD=db-password  # Пароль пользователя для подключения к БД
-DB_NAME=user_order_api     # Имя базы данных
-DB_SSLMODE=disable         # Режим SSL для подключения к БД
-JWT_SECRET=your-secret-key # Секретный ключ для подписи JWT
-JWT_EXPIRATION=24h         # Время жизни токена (например, 24h)
-GIN_MODE=debug             # Режим работы Gin (debug/release)
+SERVER_PORT=8080            # Порт, на котором запускается сервер
+DB_HOST=localhost           # Адрес сервера базы данных PostgreSQL
+DB_PORT=5432                # Порт базы данных PostgreSQL
+DB_USER=postgres            # Имя пользователя для подключения к БД
+DB_PASSWORD=db-password     # Пароль пользователя для подключения к БД
+DB_NAME=user_order_api      # Имя базы данных
+DB_SSLMODE=disable          # Режим SSL для подключения к БД
+JWT_SECRET=your-secret-key  # Секретный ключ для подписи JWT
+JWT_EXPIRATION=24h          # Время жизни токена (например, 24h)
+GIN_MODE=debug              # Режим работы Gin (debug/release)
 ```
 
 #### 1.3. Запустите построение образа Docker
@@ -72,16 +72,16 @@ docker compose up -d --build
 #### 2.2. Создайте файл **.env** и настройте переменные окружения (Обязательно)
 
 ```ini
-SERVER_PORT=8080           # Порт, на котором запускается сервер
-DB_HOST=localhost          # Адрес сервера базы данных PostgreSQL
-DB_PORT=5432               # Порт базы данных PostgreSQL
-DB_USER=postgres           # Имя пользователя для подключения к БД
-DB_PASSWORD=db-password  # Пароль пользователя для подключения к БД
-DB_NAME=user_order_api     # Имя базы данных
-DB_SSLMODE=disable         # Режим SSL для подключения к БД
-JWT_SECRET=your-secret-key # Секретный ключ для подписи JWT
-JWT_EXPIRATION=24h         # Время жизни токена (например, 24h)
-GIN_MODE=debug             # Режим работы Gin (debug/release)
+SERVER_PORT=8080            # Порт, на котором запускается сервер
+DB_HOST=localhost           # Адрес сервера базы данных PostgreSQL
+DB_PORT=5432                # Порт базы данных PostgreSQL
+DB_USER=postgres            # Имя пользователя для подключения к БД
+DB_PASSWORD=db-password     # Пароль пользователя для подключения к БД
+DB_NAME=user_order_api      # Имя базы данных
+DB_SSLMODE=disable          # Режим SSL для подключения к БД
+JWT_SECRET=your-secret-key  # Секретный ключ для подписи JWT
+JWT_EXPIRATION=24h          # Время жизни токена (например, 24h)
+GIN_MODE=debug              # Режим работы Gin (debug/release)
 ```
 
 #### 2.3. Запустите установщик (через bash/git bash)
