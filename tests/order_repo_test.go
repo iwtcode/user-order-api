@@ -1,4 +1,4 @@
-package repository
+package test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/iwtcode/user-order-api/internal/models"
+	"github.com/iwtcode/user-order-api/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,7 +31,7 @@ func setupMockDBRepo(t *testing.T) (*gorm.DB, sqlmock.Sqlmock, func()) {
 func TestOrderRepository_CreateOrder(t *testing.T) {
 	db, mock, cleanup := setupMockDBRepo(t)
 	defer cleanup()
-	repo := NewOrderRepository(db)
+	repo := repository.NewOrderRepository(db)
 	order := &models.Order{UserID: 1, Product: "Book", Quantity: 2, Price: 10.5}
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "orders"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -43,7 +44,7 @@ func TestOrderRepository_CreateOrder(t *testing.T) {
 func TestOrderRepository_CreateOrder_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBRepo(t)
 	defer cleanup()
-	repo := NewOrderRepository(db)
+	repo := repository.NewOrderRepository(db)
 	order := &models.Order{UserID: 1, Product: "Book", Quantity: 2, Price: 10.5}
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "orders"`)).WillReturnError(errors.New("db error"))
@@ -57,7 +58,7 @@ func TestOrderRepository_CreateOrder_Error(t *testing.T) {
 func TestOrderRepository_ListOrdersByUserID(t *testing.T) {
 	db, mock, cleanup := setupMockDBRepo(t)
 	defer cleanup()
-	repo := NewOrderRepository(db)
+	repo := repository.NewOrderRepository(db)
 	userID := uint(1)
 	rows := sqlmock.NewRows([]string{"id", "user_id", "product", "quantity", "price", "created_at"}).
 		AddRow(1, userID, "Book", 2, 10.5, time.Now()) // исправлено: передаем time.Time, а не строку
@@ -73,7 +74,7 @@ func TestOrderRepository_ListOrdersByUserID(t *testing.T) {
 func TestOrderRepository_ListOrdersByUserID_Empty(t *testing.T) {
 	db, mock, cleanup := setupMockDBRepo(t)
 	defer cleanup()
-	repo := NewOrderRepository(db)
+	repo := repository.NewOrderRepository(db)
 	userID := uint(2)
 	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 AND "orders"\."deleted_at" IS NULL ORDER BY created_at desc`).WithArgs(userID).WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "product", "quantity", "price", "created_at"}))
 	orders, err := repo.ListOrdersByUserID(context.Background(), userID)
@@ -85,7 +86,7 @@ func TestOrderRepository_ListOrdersByUserID_Empty(t *testing.T) {
 func TestOrderRepository_ListOrdersByUserID_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBRepo(t)
 	defer cleanup()
-	repo := NewOrderRepository(db)
+	repo := repository.NewOrderRepository(db)
 	userID := uint(3)
 	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE user_id = \$1 AND "orders"\."deleted_at" IS NULL ORDER BY created_at desc`).WithArgs(userID).WillReturnError(errors.New("db error"))
 	orders, err := repo.ListOrdersByUserID(context.Background(), userID)

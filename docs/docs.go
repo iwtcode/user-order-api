@@ -79,6 +79,11 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список пользователей с пагинацией и фильтрацией",
                 "consumes": [
                     "application/json"
@@ -186,6 +191,11 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -234,6 +244,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обновляет данные пользователя по ID",
                 "consumes": [
                     "application/json"
@@ -298,6 +313,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Удаляет пользователя по ID",
                 "consumes": [
                     "application/json"
@@ -348,6 +368,11 @@ const docTemplate = `{
         },
         "/users/{id}/orders": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список заказов пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -399,6 +424,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Создаёт новый заказ для пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -584,6 +614,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

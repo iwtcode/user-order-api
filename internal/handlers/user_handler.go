@@ -80,6 +80,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Router /users [get]
+// @Security BearerAuth
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	// Получение параметров пагинации и фильтрации
 	page, err1 := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -123,6 +124,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /users/{id} [get]
+// @Security BearerAuth
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	// Получение и проверка ID
 	idParam := c.Param("id")
@@ -161,6 +163,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Failure 422 {object} map[string]interface{}
 // @Router /users/{id} [put]
+// @Security BearerAuth
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	// Получение и проверка ID
 	idParam := c.Param("id")
@@ -217,6 +220,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /users/{id} [delete]
+// @Security BearerAuth
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	// Получение и проверка ID
 	idParam := c.Param("id")

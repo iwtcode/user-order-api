@@ -161,6 +161,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получить список пользователей
       tags:
       - users
@@ -226,6 +228,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Удалить пользователя
       tags:
       - users
@@ -258,6 +262,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получить пользователя по ID
       tags:
       - users
@@ -301,6 +307,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - BearerAuth: []
       summary: Обновить пользователя
       tags:
       - users
@@ -336,6 +344,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получить заказы пользователя
       tags:
       - orders
@@ -379,7 +389,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - BearerAuth: []
       summary: Создать заказ для пользователя
       tags:
       - orders
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

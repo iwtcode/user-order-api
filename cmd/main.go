@@ -17,6 +17,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 // Настраивает маршруты HTTP API
 func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, orderHandler *handlers.OrderHandler) *gin.Engine {
 	router := gin.New()

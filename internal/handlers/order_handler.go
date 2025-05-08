@@ -34,6 +34,7 @@ func NewOrderHandler(orderService services.OrderService) *OrderHandler {
 // @Failure 404 {object} map[string]string
 // @Failure 422 {object} map[string]interface{}
 // @Router /users/{id}/orders [post]
+// @Security BearerAuth
 func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	// Получение и проверка userID
 	userIDParam := c.Param("id")
@@ -83,6 +84,7 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /users/{id}/orders [get]
+// @Security BearerAuth
 func (h *OrderHandler) GetOrdersByUserID(c *gin.Context) {
 	// Получение и проверка userID
 	userIDParam := c.Param("id")

@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iwtcode/user-order-api/internal/handlers"
 	"github.com/iwtcode/user-order-api/internal/models"
 	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
@@ -96,7 +97,7 @@ func TestUserHandler_CreateUser(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewUserHandler(mockSvc)
+			h := handlers.NewUserHandler(mockSvc)
 			r := gin.Default()
 			r.POST("/users", h.CreateUser)
 			body, _ := json.Marshal(tt.requestBody)
@@ -157,7 +158,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewUserHandler(mockSvc)
+			h := handlers.NewUserHandler(mockSvc)
 			r := gin.Default()
 			r.GET("/users", h.ListUsers)
 			req, _ := http.NewRequest(http.MethodGet, "/users"+tt.query, nil)
@@ -229,7 +230,7 @@ func TestUserHandler_GetUserByID(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewUserHandler(mockSvc)
+			h := handlers.NewUserHandler(mockSvc)
 			r := gin.Default()
 			r.GET("/users/:id", h.GetUserByID)
 			req, _ := http.NewRequest(http.MethodGet, "/users/"+tt.userID, nil)
@@ -318,7 +319,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewUserHandler(mockSvc)
+			h := handlers.NewUserHandler(mockSvc)
 			r := gin.Default()
 			r.PUT("/users/:id", h.UpdateUser)
 			body, _ := json.Marshal(tt.requestBody)
@@ -385,7 +386,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewUserHandler(mockSvc)
+			h := handlers.NewUserHandler(mockSvc)
 			r := gin.Default()
 			r.DELETE("/users/:id", h.DeleteUser)
 			req, _ := http.NewRequest(http.MethodDelete, "/users/"+tt.userID, nil)

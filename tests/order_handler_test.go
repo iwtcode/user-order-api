@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iwtcode/user-order-api/internal/handlers"
 	"github.com/iwtcode/user-order-api/internal/models"
 	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
@@ -98,7 +99,7 @@ func TestOrderHandler_CreateOrder(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewOrderHandler(mockSvc)
+			h := handlers.NewOrderHandler(mockSvc)
 
 			r := gin.Default()
 			r.POST("/users/:id/orders", h.CreateOrder)
@@ -173,7 +174,7 @@ func TestOrderHandler_GetOrdersByUserID(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewOrderHandler(mockSvc)
+			h := handlers.NewOrderHandler(mockSvc)
 
 			r := gin.Default()
 			r.GET("/users/:id/orders", h.GetOrdersByUserID)

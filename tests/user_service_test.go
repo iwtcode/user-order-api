@@ -1,10 +1,11 @@
-package services
+package test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/iwtcode/user-order-api/internal/models"
+	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -39,7 +40,7 @@ func (m *mockUserRepo) DeleteUser(ctx context.Context, id uint) error {
 
 func TestUserService_CreateUser(t *testing.T) {
 	repo := new(mockUserRepo)
-	svc := NewUserService(repo)
+	svc := services.NewUserService(repo)
 	ctx := context.Background()
 
 	req := &models.CreateUserRequest{Name: "Test", Email: "a@b.com", Age: 20, Password: "12345678"}
@@ -56,20 +57,20 @@ func TestUserService_CreateUser(t *testing.T) {
 
 func TestUserService_CreateUser_DuplicateEmail(t *testing.T) {
 	repo := new(mockUserRepo)
-	svc := NewUserService(repo)
+	svc := services.NewUserService(repo)
 	ctx := context.Background()
 
 	req := &models.CreateUserRequest{Name: "Test", Email: "a@b.com", Age: 20, Password: "12345678"}
 	repo.On("GetUserByEmail", ctx, req.Email).Return(&models.User{Email: req.Email}, nil)
 
 	user, err := svc.CreateUser(ctx, req)
-	assert.ErrorIs(t, err, ErrEmailExists)
+	assert.ErrorIs(t, err, services.ErrEmailExists)
 	assert.Nil(t, user)
 }
 
 func TestUserService_GetUserByID(t *testing.T) {
 	repo := new(mockUserRepo)
-	svc := NewUserService(repo)
+	svc := services.NewUserService(repo)
 	ctx := context.Background()
 
 	repo.On("GetUserByID", ctx, uint(1)).Return(&models.User{Email: "a@b.com"}, nil)
@@ -80,18 +81,18 @@ func TestUserService_GetUserByID(t *testing.T) {
 
 func TestUserService_GetUserByID_NotFound(t *testing.T) {
 	repo := new(mockUserRepo)
-	svc := NewUserService(repo)
+	svc := services.NewUserService(repo)
 	ctx := context.Background()
 
 	repo.On("GetUserByID", ctx, uint(2)).Return(nil, nil)
 	user, err := svc.GetUserByID(ctx, 2)
-	assert.ErrorIs(t, err, ErrUserNotFound)
+	assert.ErrorIs(t, err, services.ErrUserNotFound)
 	assert.Nil(t, user)
 }
 
 func TestUserService_ListUsers(t *testing.T) {
 	repo := new(mockUserRepo)
-	svc := NewUserService(repo)
+	svc := services.NewUserService(repo)
 	ctx := context.Background()
 
 	users := []models.User{{Email: "a@b.com"}, {Email: "b@b.com"}}

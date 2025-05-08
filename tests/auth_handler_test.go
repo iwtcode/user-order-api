@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iwtcode/user-order-api/internal/handlers"
 	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -76,7 +77,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			if tt.mockSetup != nil {
 				tt.mockSetup(mockSvc)
 			}
-			h := NewAuthHandler(mockSvc)
+			h := handlers.NewAuthHandler(mockSvc)
 
 			r := gin.Default()
 			r.POST("/login", h.Login)

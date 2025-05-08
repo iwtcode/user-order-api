@@ -1,4 +1,4 @@
-package repository
+package test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/iwtcode/user-order-api/internal/models"
+	"github.com/iwtcode/user-order-api/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,7 +31,7 @@ func setupMockDBUser(t *testing.T) (*gorm.DB, sqlmock.Sqlmock, func()) {
 func TestUserRepository_CreateUser(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	user := &models.User{Name: "Test", Email: "test@mail.com", Age: 30, PasswordHash: "hash"}
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users"`)).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
@@ -43,7 +44,7 @@ func TestUserRepository_CreateUser(t *testing.T) {
 func TestUserRepository_CreateUser_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	user := &models.User{Name: "Test", Email: "test@mail.com", Age: 30, PasswordHash: "hash"}
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users"`)).WillReturnError(errors.New("db error"))
@@ -57,7 +58,7 @@ func TestUserRepository_CreateUser_Error(t *testing.T) {
 func TestUserRepository_GetUserByEmail(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	email := "test@mail.com"
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "age", "password_hash"}).AddRow(1, "Test", email, 30, "hash")
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE email = \$1 AND "users"\."deleted_at" IS NULL ORDER BY "users"\."id" LIMIT \$2`).WithArgs(email, 1).WillReturnRows(rows)
@@ -71,7 +72,7 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 func TestUserRepository_GetUserByEmail_NotFound(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	email := "notfound@mail.com"
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE email = \$1 AND "users"\."deleted_at" IS NULL ORDER BY "users"\."id" LIMIT \$2`).WithArgs(email, 1).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "age", "password_hash"}))
 	user, err := repo.GetUserByEmail(context.Background(), email)
@@ -83,7 +84,7 @@ func TestUserRepository_GetUserByEmail_NotFound(t *testing.T) {
 func TestUserRepository_GetUserByID(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	id := uint(1)
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "age", "password_hash"}).AddRow(1, "Test", "test@mail.com", 30, "hash")
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"\."id" = \$1 AND "users"\."deleted_at" IS NULL ORDER BY "users"\."id" LIMIT \$2`).WithArgs(id, 1).WillReturnRows(rows)
@@ -97,7 +98,7 @@ func TestUserRepository_GetUserByID(t *testing.T) {
 func TestUserRepository_GetUserByID_NotFound(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	id := uint(2)
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"\."id" = \$1 AND "users"\."deleted_at" IS NULL ORDER BY "users"\."id" LIMIT \$2`).WithArgs(id, 1).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "age", "password_hash"}))
 	user, err := repo.GetUserByID(context.Background(), id)
@@ -109,7 +110,7 @@ func TestUserRepository_GetUserByID_NotFound(t *testing.T) {
 func TestUserRepository_ListUsers(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "age", "password_hash"}).AddRow(1, "Test", "test@mail.com", 30, "hash")
 	mock.ExpectQuery(`SELECT count\(\*\) FROM "users" WHERE "users"\."deleted_at" IS NULL`).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"\."deleted_at" IS NULL LIMIT \$1`).WithArgs(10).WillReturnRows(rows)
@@ -123,7 +124,7 @@ func TestUserRepository_ListUsers(t *testing.T) {
 func TestUserRepository_ListUsers_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	mock.ExpectQuery(`SELECT count\(\*\) FROM "users" WHERE "users"\."deleted_at" IS NULL`).WillReturnError(errors.New("db error"))
 	users, total, err := repo.ListUsers(context.Background(), 1, 10, 0, 0)
 	assert.Error(t, err)
@@ -135,7 +136,7 @@ func TestUserRepository_ListUsers_Error(t *testing.T) {
 func TestUserRepository_UpdateUser(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	user := &models.User{Name: "Test", Email: "test@mail.com", Age: 30, PasswordHash: "hash"}
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET`).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -148,7 +149,7 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 func TestUserRepository_UpdateUser_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	user := &models.User{Name: "Test", Email: "test@mail.com", Age: 30, PasswordHash: "hash"}
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET`).WillReturnError(errors.New("db error"))
@@ -162,7 +163,7 @@ func TestUserRepository_UpdateUser_Error(t *testing.T) {
 func TestUserRepository_DeleteUser(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	id := uint(1)
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET "deleted_at"=\$1 WHERE "users"\."id" = \$2 AND "users"\."deleted_at" IS NULL`).WithArgs(sqlmock.AnyArg(), id).WillReturnResult(sqlmock.NewResult(0, 1))
@@ -175,7 +176,7 @@ func TestUserRepository_DeleteUser(t *testing.T) {
 func TestUserRepository_DeleteUser_NotFound(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	id := uint(2)
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET "deleted_at"=\$1 WHERE "users"\."id" = \$2 AND "users"\."deleted_at" IS NULL`).WithArgs(sqlmock.AnyArg(), id).WillReturnResult(sqlmock.NewResult(0, 0))
@@ -188,7 +189,7 @@ func TestUserRepository_DeleteUser_NotFound(t *testing.T) {
 func TestUserRepository_DeleteUser_Error(t *testing.T) {
 	db, mock, cleanup := setupMockDBUser(t)
 	defer cleanup()
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 	id := uint(1)
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET "deleted_at"=\$1 WHERE "users"\."id" = \$2 AND "users"\."deleted_at" IS NULL`).WithArgs(sqlmock.AnyArg(), id).WillReturnError(errors.New("db error"))

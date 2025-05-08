@@ -68,6 +68,11 @@
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список пользователей с пагинацией и фильтрацией",
                 "consumes": [
                     "application/json"
@@ -175,6 +180,11 @@
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -223,6 +233,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обновляет данные пользователя по ID",
                 "consumes": [
                     "application/json"
@@ -287,6 +302,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Удаляет пользователя по ID",
                 "consumes": [
                     "application/json"
@@ -337,6 +357,11 @@
         },
         "/users/{id}/orders": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список заказов пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -388,6 +413,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Создаёт новый заказ для пользователя по его ID",
                 "consumes": [
                     "application/json"
@@ -573,6 +603,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

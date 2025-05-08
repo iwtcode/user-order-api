@@ -1,10 +1,11 @@
-package services
+package test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/iwtcode/user-order-api/internal/models"
+	"github.com/iwtcode/user-order-api/internal/services"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -32,7 +33,7 @@ func (m *mockUserRepo) GetUserByID(ctx context.Context, id uint) (*models.User, 
 func TestOrderService_CreateOrder(t *testing.T) {
 	orderRepo := new(mockOrderRepo)
 	userRepo := new(mockUserRepo)
-	svc := NewOrderService(orderRepo, userRepo)
+	svc := services.NewOrderService(orderRepo, userRepo)
 	ctx := context.Background()
 
 	user := &models.User{Email: "a@b.com"}
@@ -52,21 +53,21 @@ func TestOrderService_CreateOrder(t *testing.T) {
 func TestOrderService_CreateOrder_UserNotFound(t *testing.T) {
 	orderRepo := new(mockOrderRepo)
 	userRepo := new(mockUserRepo)
-	svc := NewOrderService(orderRepo, userRepo)
+	svc := services.NewOrderService(orderRepo, userRepo)
 	ctx := context.Background()
 
 	orderReq := &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}
 	userRepo.On("GetUserByID", ctx, uint(2)).Return(nil, nil)
 
 	order, err := svc.CreateOrder(ctx, 2, orderReq)
-	assert.ErrorIs(t, err, ErrOrderUserNotFound)
+	assert.ErrorIs(t, err, services.ErrOrderUserNotFound)
 	assert.Nil(t, order)
 }
 
 func TestOrderService_ListOrdersByUserID(t *testing.T) {
 	orderRepo := new(mockOrderRepo)
 	userRepo := new(mockUserRepo)
-	svc := NewOrderService(orderRepo, userRepo)
+	svc := services.NewOrderService(orderRepo, userRepo)
 	ctx := context.Background()
 
 	user := &models.User{Email: "a@b.com"}
@@ -83,12 +84,12 @@ func TestOrderService_ListOrdersByUserID(t *testing.T) {
 func TestOrderService_ListOrdersByUserID_UserNotFound(t *testing.T) {
 	orderRepo := new(mockOrderRepo)
 	userRepo := new(mockUserRepo)
-	svc := NewOrderService(orderRepo, userRepo)
+	svc := services.NewOrderService(orderRepo, userRepo)
 	ctx := context.Background()
 
 	userRepo.On("GetUserByID", ctx, uint(2)).Return(nil, nil)
 
 	result, err := svc.ListOrdersByUserID(ctx, 2)
-	assert.ErrorIs(t, err, ErrOrderUserNotFound)
+	assert.ErrorIs(t, err, services.ErrOrderUserNotFound)
 	assert.Nil(t, result)
 }
