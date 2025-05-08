@@ -59,6 +59,13 @@ func main() {
 		return
 	}
 
+	// Устанавливаем режим Gin
+	if cfg.GinMode == "RELEASE" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
 	// Подключаемся к базе данных
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
