@@ -6,10 +6,20 @@ REST API для управления пользователями и их зак
 
 ---
 
-## Быстрый старт
+## Основные эндпоинты
 
-> **Документация API доступна после запуска приложения по адресу:**
-> [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+`POST /auth/login` — авторизация, получение JWT<br>
+`POST /users` — создание пользователя<br>
+`GET /users` — список пользователей (пагинация, фильтрация)<br>
+`GET /users/{id}` — получить пользователя по ID<br>
+`PUT /users/{id}` — обновить пользователя<br>
+`DELETE /users/{id}` — удалить пользователя<br>
+`POST /users/{user_id}/orders` — создать заказ для пользователя<br>
+`GET /users/{user_id}/orders` — получить заказы пользователя
+
+Полная документация — [Swagger UI](http://localhost:8080/swagger/index.html)
+
+## Быстрый старт
 
 ### 1. Запуск через Docker Compose (рекомендуется)
 
@@ -20,16 +30,16 @@ REST API для управления пользователями и их зак
 #### 1.2. Создайте файл **.env** и настройте переменные окружения (Опционально)
 
 ```ini
-SERVER_PORT=8080
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your-postgres-password
-DB_NAME=user_order_api
-DB_SSLMODE=disable
-JWT_SECRET=your-secret-key
-JWT_EXPIRATION=24h
-GIN_MODE=debug
+SERVER_PORT=8080           # Порт, на котором запускается сервер
+DB_HOST=localhost          # Адрес сервера базы данных PostgreSQL
+DB_PORT=5432               # Порт базы данных PostgreSQL
+DB_USER=postgres           # Имя пользователя для подключения к БД
+DB_PASSWORD=db-password  # Пароль пользователя для подключения к БД
+DB_NAME=user_order_api     # Имя базы данных
+DB_SSLMODE=disable         # Режим SSL для подключения к БД
+JWT_SECRET=your-secret-key # Секретный ключ для подписи JWT
+JWT_EXPIRATION=24h         # Время жизни токена (например, 24h)
+GIN_MODE=debug             # Режим работы Gin (debug/release)
 ```
 
 #### 1.3. Запустите построение образа Docker
@@ -62,16 +72,16 @@ docker compose up -d --build
 #### 2.2. Создайте файл **.env** и настройте переменные окружения (Обязательно)
 
 ```ini
-SERVER_PORT=8080
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your-postgres-password
-DB_NAME=user_order_api
-DB_SSLMODE=disable
-JWT_SECRET=your-secret-key
-JWT_EXPIRATION=24h
-GIN_MODE=debug
+SERVER_PORT=8080           # Порт, на котором запускается сервер
+DB_HOST=localhost          # Адрес сервера базы данных PostgreSQL
+DB_PORT=5432               # Порт базы данных PostgreSQL
+DB_USER=postgres           # Имя пользователя для подключения к БД
+DB_PASSWORD=db-password  # Пароль пользователя для подключения к БД
+DB_NAME=user_order_api     # Имя базы данных
+DB_SSLMODE=disable         # Режим SSL для подключения к БД
+JWT_SECRET=your-secret-key # Секретный ключ для подписи JWT
+JWT_EXPIRATION=24h         # Время жизни токена (например, 24h)
+GIN_MODE=debug             # Режим работы Gin (debug/release)
 ```
 
 #### 2.3. Запустите установщик (через bash/git bash)
