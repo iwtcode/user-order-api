@@ -14,7 +14,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 // @securityDefinitions.apikey BearerAuth
@@ -28,7 +27,7 @@ import (
 func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, orderHandler *handlers.OrderHandler) *gin.Engine {
 	router := gin.New()
 	router.SetTrustedProxies(nil)
-	router.Use(gin.Logger())
+	router.Use(middleware.LoggerMiddleware())
 	router.Use(gin.Recovery())
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -66,9 +65,12 @@ func main() {
 		gin.SetMode(gin.DebugMode)
 	}
 
+	// Инициализация логгера
+	utils.InitLogger(cfg.LogFile)
+
 	// Подключаемся к базе данных
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: &utils.GormLogger{},
 	})
 	if err != nil {
 		utils.Error("Failed to connect to database: %v", err)

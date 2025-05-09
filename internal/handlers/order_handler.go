@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/iwtcode/user-order-api/internal/models"
 	"github.com/iwtcode/user-order-api/internal/services"
+	"github.com/iwtcode/user-order-api/internal/utils"
 )
 
 // Хэндлер для работы с заказами (REST API)
@@ -40,11 +41,13 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	// Получаем user_id из JWT (middleware)
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
+		utils.Warn("User ID not found in token during order creation")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
 		return
 	}
 	userID, ok := userIDValue.(uint)
 	if !ok {
+		utils.Error("Invalid user ID in token during order creation")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
 		return
 	}
@@ -53,16 +56,19 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	var pathID uint
 	_, err := fmt.Sscanf(idParam, "%d", &pathID)
 	if err != nil || pathID == 0 {
+		utils.Warn("Invalid user ID in path during order creation: %s", idParam)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID in path"})
 		return
 	}
 	if userID != pathID {
+		utils.Warn("Access denied: user %d tried to create order for user %d", userID, pathID)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied: you can only operate with your own orders"})
 		return
 	}
 	// Валидация и разбор запроса
 	var req models.OrderCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.Warn("Validation failed during order creation: %v", err)
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			details := make([]string, 0, len(ve))
@@ -79,12 +85,15 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	order, err := h.orderService.CreateOrder(c.Request.Context(), userID, &req)
 	if err != nil {
 		if errors.Is(err, services.ErrOrderUserNotFound) {
+			utils.Warn("Order creation failed: user not found (user_id=%d)", userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
+		utils.Error("Failed to create order for user_id=%d: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order"})
 		return
 	}
+	utils.Info("Order created: id=%d, user_id=%d, product=%s", order.ID, userID, order.Product)
 	// Формирование и отправка ответа
 	resp := models.BuildOrderResponse(order)
 	c.JSON(http.StatusCreated, resp)
@@ -107,11 +116,13 @@ func (h *OrderHandler) GetOrdersByUserID(c *gin.Context) {
 	// Получаем user_id из JWT (middleware)
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
+		utils.Warn("User ID not found in token during order list fetch")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
 		return
 	}
 	userID, ok := userIDValue.(uint)
 	if !ok {
+		utils.Error("Invalid user ID in token during order list fetch")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
 		return
 	}
@@ -120,10 +131,12 @@ func (h *OrderHandler) GetOrdersByUserID(c *gin.Context) {
 	var pathID uint
 	_, err := fmt.Sscanf(idParam, "%d", &pathID)
 	if err != nil || pathID == 0 {
+		utils.Warn("Invalid user ID in path during order list fetch: %s", idParam)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID in path"})
 		return
 	}
 	if userID != pathID {
+		utils.Warn("Access denied: user %d tried to view orders for user %d", userID, pathID)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied: you can only view your own orders"})
 		return
 	}
@@ -131,12 +144,15 @@ func (h *OrderHandler) GetOrdersByUserID(c *gin.Context) {
 	orders, err := h.orderService.ListOrdersByUserID(c.Request.Context(), userID)
 	if err != nil {
 		if errors.Is(err, services.ErrOrderUserNotFound) {
+			utils.Warn("Order list fetch failed: user not found (user_id=%d)", userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
+		utils.Error("Failed to fetch orders for user_id=%d: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch orders"})
 		return
 	}
+	utils.Info("Orders fetched for user_id=%d, count=%d", userID, len(orders))
 	// Формирование и отправка ответа
 	resp := make([]models.OrderResponse, len(orders))
 	for i, o := range orders {

@@ -40,6 +40,7 @@ DB_SSLMODE=disable          # Режим SSL для подключения к Б
 JWT_SECRET=your-secret-key  # Секретный ключ для подписи JWT
 JWT_EXPIRATION=24h          # Время жизни токена (например, 24h)
 GIN_MODE=debug              # Режим работы Gin (debug/release)
+LOG_FILE=logs/app.log       # Путь к файлу логов
 ```
 
 #### 1.3. Запустите построение образа Docker
@@ -82,6 +83,7 @@ DB_SSLMODE=disable          # Режим SSL для подключения к Б
 JWT_SECRET=your-secret-key  # Секретный ключ для подписи JWT
 JWT_EXPIRATION=24h          # Время жизни токена (например, 24h)
 GIN_MODE=debug              # Режим работы Gin (debug/release)
+LOG_FILE=logs/app.log       # Путь к файлу логов
 ```
 
 #### 2.3. Запустите установщик (через bash/git bash)

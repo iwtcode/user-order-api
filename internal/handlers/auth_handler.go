@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iwtcode/user-order-api/internal/services"
+	"github.com/iwtcode/user-order-api/internal/utils"
 )
 
 // Хэндлер для авторизации пользователей (REST API)
@@ -40,6 +41,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Валидация и разбор запроса
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.Warn("Validation failed during login: %v", err)
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Validation failed", "details": err.Error()})
 		return
 	}
@@ -49,14 +51,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		status := http.StatusInternalServerError
 		if err == services.ErrInvalidCredentials {
+			utils.Warn("Invalid credentials for email: %s", req.Email)
 			status = http.StatusUnauthorized
 			c.JSON(status, gin.H{"error": "Invalid email or password"})
 			return
 		}
+		utils.Error("Login failed for email %s: %v", req.Email, err)
 		c.JSON(status, gin.H{"error": "Login failed"})
 		return
 	}
 
+	utils.Info("User logged in: %s", req.Email)
 	// Формирование и отправка ответа
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }

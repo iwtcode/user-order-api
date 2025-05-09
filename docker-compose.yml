@@ -15,6 +15,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-your-secret-key}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
       - GIN_MODE=${GIN_MODE:-debug}
+      - LOG_FILE=${LOG_FILE:-logs/app.log}
     depends_on:
       db:
         condition: service_healthy

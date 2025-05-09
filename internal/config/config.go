@@ -12,7 +12,8 @@ import (
 type Config struct {
 	DBConnectionString string
 	ServerPort         string
-	GinMode            string // DEBUG/RELEASE
+	GinMode            string
+	LogFile            string
 }
 
 // Функция загружает конфигурацию из .env файла или переменных окружения
@@ -36,12 +37,14 @@ func LoadConfig() (*Config, error) {
 
 	serverPort := getEnv("SERVER_PORT", "8080")
 	ginMode := getEnv("GIN_MODE", "debug")
+	logFile := getEnv("LOG_FILE", "")
 
 	// Возвращаем структуру конфигурации
 	return &Config{
 		DBConnectionString: dsn,
 		ServerPort:         ":" + serverPort,
 		GinMode:            ginMode,
+		LogFile:            logFile,
 	}, nil
 }
 

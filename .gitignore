@@ -6,3 +6,4 @@
 *.txt
 .env
 server
+logs
