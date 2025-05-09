@@ -50,7 +50,7 @@ func (s *userService) CreateUser(ctx context.Context, req *models.CreateUserRequ
 		return nil, fmt.Errorf("error checking for existing email: %w", err)
 	}
 	if existingUser != nil {
-		return nil, fmt.Errorf("attempt to create user with duplicate email: %s", req.Email)
+		return nil, fmt.Errorf("attempt to create user with duplicate email: %s %w", req.Email, ErrEmailExists)
 	}
 	// Хешируем пароль
 	hashedPassword, err := utils.HashPassword(req.Password)
