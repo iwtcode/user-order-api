@@ -58,12 +58,58 @@ func formatLevel(level logrus.Level, colors bool) string {
 	}
 }
 
+// LogMessage описывает структуру сообщения для асинхронного логирования
+// level - уровень, src - источник, msg - текст
+// fileLog - писать ли в файл
+type LogMessage struct {
+	Level   logrus.Level
+	Src     string
+	Msg     string
+	FileLog bool
+}
+
 // Глобальные переменные для логгеров консоли и файла, а также для однократной инициализации
 var (
 	consoleLogger *logrus.Logger
 	fileLogger    *logrus.Logger
 	initOnce      sync.Once
+	logChan       chan LogMessage
+	workerOnce    sync.Once
 )
+
+// startLogWorker запускает воркер для асинхронного логирования
+func startLogWorker() {
+	workerOnce.Do(func() {
+		logChan = make(chan LogMessage, 1000)
+		go func() {
+			for logMsg := range logChan {
+				entry := consoleLogger.WithField("src", logMsg.Src)
+				switch logMsg.Level {
+				case logrus.ErrorLevel:
+					entry.Error(logMsg.Msg)
+					if fileLogger != nil && logMsg.FileLog {
+						fileLogger.WithField("src", logMsg.Src).Error(logMsg.Msg)
+					}
+				case logrus.WarnLevel:
+					entry.Warn(logMsg.Msg)
+					if fileLogger != nil && logMsg.FileLog {
+						fileLogger.WithField("src", logMsg.Src).Warn(logMsg.Msg)
+					}
+				case logrus.InfoLevel:
+					entry.Info(logMsg.Msg)
+					if fileLogger != nil && logMsg.FileLog {
+						fileLogger.WithField("src", logMsg.Src).Info(logMsg.Msg)
+					}
+				case logrus.DebugLevel:
+					entry.Debug(logMsg.Msg)
+					if fileLogger != nil && logMsg.FileLog {
+						fileLogger.WithField("src", logMsg.Src).Debug(logMsg.Msg)
+					}
+				}
+			}
+		}()
+	})
+}
 
 // InitLogger инициализирует логгеры для консоли и файла (если указан путь к файлу)
 func InitLogger(logFile string) {
@@ -89,14 +135,16 @@ func InitLogger(logFile string) {
 				}
 			}
 		}
+		startLogWorker()
 	})
 }
 
-// logWithLevel логирует сообщение на заданном уровне с указанием источника
+// logWithLevel логирует сообщение на заданном уровне с указанием источника (асинхронно)
 func logWithLevel(level logrus.Level, src, format string, v ...interface{}) {
 	if consoleLogger == nil {
 		InitLogger("")
 	}
+	startLogWorker()
 	msg := fmt.Sprintf(format, v...)
 	if src == "LOG" || src == "" {
 		if pc, file, line, ok := runtime.Caller(2); ok {
@@ -111,28 +159,12 @@ func logWithLevel(level logrus.Level, src, format string, v ...interface{}) {
 			src = fmt.Sprintf("%s/%s:%d", fileName, funcName, line)
 		}
 	}
-	entry := consoleLogger.WithField("src", src)
-	switch level {
-	case logrus.ErrorLevel:
-		entry.Error(msg)
-		if fileLogger != nil {
-			fileLogger.WithField("src", src).Error(msg)
-		}
-	case logrus.WarnLevel:
-		entry.Warn(msg)
-		if fileLogger != nil {
-			fileLogger.WithField("src", src).Warn(msg)
-		}
-	case logrus.InfoLevel:
-		entry.Info(msg)
-		if fileLogger != nil {
-			fileLogger.WithField("src", src).Info(msg)
-		}
-	case logrus.DebugLevel:
-		entry.Debug(msg)
-		if fileLogger != nil {
-			fileLogger.WithField("src", src).Debug(msg)
-		}
+	// Отправляем в канал для асинхронного логирования
+	logChan <- LogMessage{
+		Level:   level,
+		Src:     src,
+		Msg:     msg,
+		FileLog: true,
 	}
 }
 

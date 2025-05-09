@@ -2,14 +2,10 @@ package services
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/iwtcode/user-order-api/internal/repository"
 	"github.com/iwtcode/user-order-api/internal/utils"
-)
-
-var (
-	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 // Интерфейс сервиса авторизации
@@ -34,19 +30,16 @@ func (s *authService) Login(ctx context.Context, email, password string) (string
 	// Получаем пользователя по email
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
-		utils.Error("Database error during login for email %s: %v", email, err)
-		return "", errors.New("database error: " + err.Error())
+		return "", fmt.Errorf("database error during login for email %s: %w", email, err)
 	}
 	// Проверяем пароль
 	if user == nil || !utils.CheckPasswordHash(password, user.PasswordHash) {
-		utils.Warn("Invalid credentials for email: %s", email)
 		return "", ErrInvalidCredentials
 	}
 	// Генерируем JWT-токен
 	token, err := utils.GenerateJWT(user.ID)
 	if err != nil {
-		utils.Error("Failed to generate JWT for user id=%d: %v", user.ID, err)
-		return "", errors.New("failed to generate JWT: " + err.Error())
+		return "", fmt.Errorf("failed to generate JWT for user id=%d: %w", user.ID, err)
 	}
 	return token, nil
 }

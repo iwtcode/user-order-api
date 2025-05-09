@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -50,7 +51,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	token, err := h.authService.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		status := http.StatusInternalServerError
-		if err == services.ErrInvalidCredentials {
+		if errors.Is(err, services.ErrInvalidCredentials) {
 			utils.Warn("Invalid credentials for email: %s", req.Email)
 			status = http.StatusUnauthorized
 			c.JSON(status, gin.H{"error": "Invalid email or password"})
