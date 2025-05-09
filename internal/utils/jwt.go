@@ -8,16 +8,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Функция для генерации и проверки JWT-токенов
+// Загружаем .env один раз при инициализации пакета
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		Warn("No .env file found or error loading it, relying on environment variables. %v", err)
+	}
+}
+
 // jwtSecret — секретный ключ для подписи токенов
 var jwtSecret = []byte(getJWTSecret())
 
 // Получает секретный ключ из .env или переменных окружения
 func getJWTSecret() string {
-	err := godotenv.Load()
-	if err != nil {
-		Warn("No .env file found or error loading it, relying on environment variables. %v", err)
-	}
 	if value, exists := os.LookupEnv("JWT_SECRET"); exists {
 		return value
 	}
@@ -26,10 +29,6 @@ func getJWTSecret() string {
 
 // Получает время жизни токена из .env или переменных окружения
 func getJWTExpiration() time.Duration {
-	err := godotenv.Load()
-	if err != nil {
-		Warn("No .env file found or error loading it, relying on environment variables. %v", err)
-	}
 	if value, exists := os.LookupEnv("JWT_EXPIRATION"); exists {
 		dur, err := time.ParseDuration(value)
 		if err == nil {
