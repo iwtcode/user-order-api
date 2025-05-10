@@ -81,18 +81,20 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		}
 		return
 	}
-	// Вызов бизнес-логики создания заказа
-	order, err := h.orderService.CreateOrder(c.Request.Context(), userID, &req)
-	if err != nil {
-		if errors.Is(err, services.ErrOrderUserNotFound) {
+	// Вызов бизнес-логики создания заказа (асинхронно)
+	resultChan := h.orderService.CreateOrder(c.Request.Context(), userID, &req)
+	result := <-resultChan
+	if result.Err != nil {
+		if errors.Is(result.Err, services.ErrOrderUserNotFound) {
 			utils.Warn("Order creation failed: user not found (user_id=%d)", userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
-		utils.Error("Failed to create order for user_id=%d: %v", userID, err)
+		utils.Error("Failed to create order for user_id=%d: %v", userID, result.Err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order"})
 		return
 	}
+	order := result.Order
 	utils.Info("Order created: id=%d, user_id=%d, product=%s", order.ID, userID, order.Product)
 	// Формирование и отправка ответа
 	resp := models.BuildOrderResponse(order)

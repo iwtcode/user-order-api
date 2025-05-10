@@ -42,12 +42,13 @@ func TestOrderService_CreateOrder(t *testing.T) {
 	userRepo.On("GetUserByID", ctx, uint(1)).Return(user, nil)
 	orderRepo.On("CreateOrder", ctx, mock.AnythingOfType("*models.Order")).Return(nil)
 
-	order, err := svc.CreateOrder(ctx, 1, orderReq)
-	assert.NoError(t, err)
-	assert.Equal(t, uint(1), order.UserID)
-	assert.Equal(t, orderReq.Product, order.Product)
-	assert.Equal(t, orderReq.Quantity, order.Quantity)
-	assert.Equal(t, orderReq.Price, order.Price)
+	resultChan := svc.CreateOrder(ctx, 1, orderReq)
+	result := <-resultChan
+	assert.NoError(t, result.Err)
+	assert.Equal(t, uint(1), result.Order.UserID)
+	assert.Equal(t, orderReq.Product, result.Order.Product)
+	assert.Equal(t, orderReq.Quantity, result.Order.Quantity)
+	assert.Equal(t, orderReq.Price, result.Order.Price)
 }
 
 func TestOrderService_CreateOrder_UserNotFound(t *testing.T) {
@@ -59,9 +60,10 @@ func TestOrderService_CreateOrder_UserNotFound(t *testing.T) {
 	orderReq := &models.OrderCreateRequest{Product: "Book", Quantity: 2, Price: 10.5}
 	userRepo.On("GetUserByID", ctx, uint(2)).Return(nil, nil)
 
-	order, err := svc.CreateOrder(ctx, 2, orderReq)
-	assert.ErrorIs(t, err, services.ErrOrderUserNotFound)
-	assert.Nil(t, order)
+	resultChan := svc.CreateOrder(ctx, 2, orderReq)
+	result := <-resultChan
+	assert.ErrorIs(t, result.Err, services.ErrOrderUserNotFound)
+	assert.Nil(t, result.Order)
 }
 
 func TestOrderService_ListOrdersByUserID(t *testing.T) {

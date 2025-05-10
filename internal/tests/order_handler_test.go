@@ -22,10 +22,14 @@ type mockOrderService struct {
 	mock.Mock
 }
 
-func (m *mockOrderService) CreateOrder(ctx context.Context, userID uint, req *models.OrderCreateRequest) (*models.Order, error) {
+func (m *mockOrderService) CreateOrder(ctx context.Context, userID uint, req *models.OrderCreateRequest) <-chan services.OrderResult {
+	ch := make(chan services.OrderResult, 1)
 	args := m.Called(ctx, userID, req)
 	order, _ := args.Get(0).(*models.Order)
-	return order, args.Error(1)
+	err := args.Error(1)
+	ch <- services.OrderResult{Order: order, Err: err}
+	close(ch)
+	return ch
 }
 
 func (m *mockOrderService) ListOrdersByUserID(ctx context.Context, userID uint) ([]models.Order, error) {
