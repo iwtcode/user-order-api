@@ -51,6 +51,8 @@ func setupRoutes(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 
 // Главная функция запускает сервер приложения
 func main() {
+	// Корректное завершение логгера при выходе
+	defer utils.ShutdownLogger()
 	// Загружаем конфигурацию
 	cfg, err := config.LoadConfig()
 	if err != nil {

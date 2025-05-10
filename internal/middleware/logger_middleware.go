@@ -22,9 +22,9 @@ func LoggerMiddleware() gin.HandlerFunc {
 		errors := c.Errors.ByType(gin.ErrorTypePrivate).String()
 
 		if errors != "" {
-			utils.ErrorSrc("GIN", "%s | %s | %d | %s | %s | %s", method, path, status, clientIP, duration, errors)
+			utils.ErrorSrc(utils.GinSource, "%s | %s | %d | %s | %s | %s", method, path, status, clientIP, duration, errors)
 		} else {
-			utils.InfoSrc("GIN", "%s | %s | %d | %s | %s", method, path, status, clientIP, duration)
+			utils.InfoSrc(utils.GinSource, "%s | %s | %d | %s | %s", method, path, status, clientIP, duration)
 		}
 	}
 }

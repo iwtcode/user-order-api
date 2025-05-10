@@ -77,6 +77,12 @@ var (
 	workerOnce    sync.Once
 )
 
+const (
+	LogSource  = "LOG"
+	GormSource = "GORM"
+	GinSource  = "GIN"
+)
+
 // startLogWorker запускает воркер для асинхронного логирования
 func startLogWorker() {
 	workerOnce.Do(func() {
@@ -111,11 +117,18 @@ func startLogWorker() {
 	})
 }
 
+// ShutdownLogger корректно завершает работу логгера и закрывает канал логов.
+func ShutdownLogger() {
+	if logChan != nil {
+		close(logChan)
+	}
+}
+
 // InitLogger инициализирует логгеры для консоли и файла (если указан путь к файлу)
 func InitLogger(logFile string) {
 	initOnce.Do(func() {
 		consoleLogger = logrus.New()
-		consoleLogger.SetFormatter(&customFormatter{Source: "LOG", Colors: true})
+		consoleLogger.SetFormatter(&customFormatter{Source: LogSource, Colors: true})
 		consoleLogger.SetReportCaller(false)
 		consoleLogger.SetOutput(os.Stdout)
 
@@ -127,7 +140,7 @@ func InitLogger(logFile string) {
 				file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 				if err == nil {
 					fileLogger = logrus.New()
-					fileLogger.SetFormatter(&customFormatter{Source: "LOG", Colors: false})
+					fileLogger.SetFormatter(&customFormatter{Source: LogSource, Colors: false})
 					fileLogger.SetReportCaller(false)
 					fileLogger.SetOutput(file)
 				} else {
@@ -146,7 +159,7 @@ func logWithLevel(level logrus.Level, src, format string, v ...interface{}) {
 	}
 	startLogWorker()
 	msg := fmt.Sprintf(format, v...)
-	if src == "LOG" || src == "" {
+	if src == LogSource || src == "" {
 		if pc, file, line, ok := runtime.Caller(2); ok {
 			fileBase := filepath.Base(file)
 			fileName := strings.TrimSuffix(fileBase, filepath.Ext(fileBase))
@@ -168,10 +181,10 @@ func logWithLevel(level logrus.Level, src, format string, v ...interface{}) {
 	}
 }
 
-func Error(format string, v ...interface{})        { logWithLevel(logrus.ErrorLevel, "LOG", format, v...) }
-func Warn(format string, v ...interface{})         { logWithLevel(logrus.WarnLevel, "LOG", format, v...) }
-func Info(format string, v ...interface{})         { logWithLevel(logrus.InfoLevel, "LOG", format, v...) }
-func Debug(format string, v ...interface{})        { logWithLevel(logrus.DebugLevel, "LOG", format, v...) }
+func Error(format string, v ...interface{})        { logWithLevel(logrus.ErrorLevel, LogSource, format, v...) }
+func Warn(format string, v ...interface{})         { logWithLevel(logrus.WarnLevel, LogSource, format, v...) }
+func Info(format string, v ...interface{})         { logWithLevel(logrus.InfoLevel, LogSource, format, v...) }
+func Debug(format string, v ...interface{})        { logWithLevel(logrus.DebugLevel, LogSource, format, v...) }
 func InfoSrc(src, format string, v ...interface{}) { logWithLevel(logrus.InfoLevel, src, format, v...) }
 func WarnSrc(src, format string, v ...interface{}) { logWithLevel(logrus.WarnLevel, src, format, v...) }
 func ErrorSrc(src, format string, v ...interface{}) {

@@ -16,15 +16,15 @@ func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
 }
 
 func (l *GormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	InfoSrc("GORM", msg, data...)
+	InfoSrc(GormSource, msg, data...)
 }
 
 func (l *GormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	WarnSrc("GORM", msg, data...)
+	WarnSrc(GormSource, msg, data...)
 }
 
 func (l *GormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
-	ErrorSrc("GORM", msg, data...)
+	ErrorSrc(GormSource, msg, data...)
 }
 
 // Trace логирует выполнение SQL-запроса, время выполнения, количество строк и ошибку (если есть)
@@ -32,8 +32,8 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	elapsed := time.Since(begin)
 	msg, rows := fc()
 	if err != nil {
-		ErrorSrc("GORM", "%s | %v | %d rows | %v", msg, elapsed, rows, err)
+		ErrorSrc(GormSource, "%s | %v | %d rows | %v", msg, elapsed, rows, err)
 	} else {
-		InfoSrc("GORM", "%s | %v | %d rows", msg, elapsed, rows)
+		InfoSrc(GormSource, "%s | %v | %d rows", msg, elapsed, rows)
 	}
 }
